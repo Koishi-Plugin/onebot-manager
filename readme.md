@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/koishi-plugin-onebot-manager?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-onebot-manager)
 
-提供群管命令，可基于规则自动处理好友/加群/邀请请求，且能监听管理/进群/退群事件
+群管插件，功能梭哈，支持禁言/踢出等全部管理可用功能，另可自动审核好友/加群/邀请请求，还支持进退群等事件通知
 
 ## ✨ 功能亮点
 
@@ -37,8 +37,8 @@ plugins:
     enableJoin: false     # 开启新成员入群监听。
     enableLeave: false    # 开启群成员退群监听。
     redirectMsg: false    # 把成员入群和退群通知统一发送到通知目标。
-    joinMessage: '{userName} 加入了本群' # 自定义入群欢迎语。
-    leaveMessage: '{userName} 离开了本群' # 自定义退群提示。
+    joinMessage: '{userName}({userId}) 加入了 {guildName}({guildId})' # 自定义入群欢迎语。
+    leaveMessage: '{userName}({userId}) 离开了 {guildName}({guildId})' # 自定义退群提示。
     # 可用占位符: {userName}, {userId}, {guildName}, {guildId}
 
     # ------------------ 请求配置 ------------------

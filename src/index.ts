@@ -51,8 +51,8 @@ export const Config: Schema<Config> = Schema.intersect([
     enableJoin: Schema.boolean().description('开启入群监听').default(false),
     enableLeave: Schema.boolean().description('开启退群监听').default(false),
     redirectMsg: Schema.boolean().description('汇总变动通知').default(false),
-    joinMessage: Schema.string().default('{userName} 加入了本群').description('进群提示'),
-    leaveMessage: Schema.string().default('{userName} 离开了本群').description('退群提示'),
+    joinMessage: Schema.string().description('进群提示').default('{userName}({userId}) 加入了 {guildName}({guildId})'),
+    leaveMessage: Schema.string().description('退群提示').default('{userName}({userId}) 离开了 {guildName}({guildId})'),
   }).description('监听配置'),
   Schema.object({
     enable: Schema.boolean().description('开启请求监听').default(true),
