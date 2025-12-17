@@ -49,6 +49,7 @@ export class OnebotRequest {
   private requestNumberMap = new Map<number, string>();
   private nextRequestNumber = 1;
   private activeRequests = new Map<string, ActiveRequest>();
+  private processedFlags = new Set<string>();
 
   /**
    * 创建 OneBot 请求处理实例
@@ -72,6 +73,21 @@ export class OnebotRequest {
     if (activeRequest.timeoutTimer) clearTimeout(activeRequest.timeoutTimer);
     this.requestNumberMap.delete(activeRequest.requestNumber);
     this.activeRequests.delete(requestKey);
+  }
+
+  /**
+   * 从验证消息中提取用户的回答
+   * 如果消息包含 "回答:" 格式，则只返回回答部分
+   */
+  private extractAnswers(message: string): string {
+    if (!message) return '';
+    const lines = message.split(/[\r\n]+/);
+    const answers = lines
+      .map(line => line.trim())
+      .filter(line => /^(回答)[:：]/i.test(line))
+      .map(line => line.replace(/^(回答)[:：]\s*/i, ''));
+    if (answers.length > 0) return answers.join('\n');
+    return message;
   }
 
   /**
@@ -127,6 +143,15 @@ export class OnebotRequest {
    * 处理收到的请求
    */
   public async processRequest(session: Session, type: RequestType): Promise<void> {
+    const flag = session.event?._data.flag;
+    if (flag) {
+      if (this.processedFlags.has(flag)) {
+        if (this.config.enableDebug) this.logger.info(`跳过重复请求: flag=${flag}`);
+        return;
+      }
+      this.processedFlags.add(flag);
+      setTimeout(() => this.processedFlags.delete(flag), 60000);
+    }
     if (this.config.enableDebug) this.logger.info(`原始事件: type=${type}, data=${JSON.stringify(session.event?._data)}`);
     const requestKey = type === 'friend' ? `friend:${session.userId}` : type === 'guild' ? `guild:${session.guildId}` : `member:${session.userId}:${session.guildId}`;
     this.cleanupActiveRequest(requestKey);
@@ -150,7 +175,7 @@ export class OnebotRequest {
    * 判断是否应自动接受请求
    */
   private async shouldAutoAccept(session: Session, type: RequestType): Promise<boolean | string> {
-    const validationMessage = session.event?._data?.comment;
+    const validationMessage = this.extractAnswers(session.event?._data?.comment);
     switch (type) {
       case 'member': {
         const { MemberRequestAutoRules = [] } = this.config;
