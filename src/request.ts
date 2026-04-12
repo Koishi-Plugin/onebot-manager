@@ -176,6 +176,11 @@ export class OnebotRequest {
    */
   private async shouldAutoAccept(session: Session, type: RequestType): Promise<boolean | string> {
     const validationMessage = this.extractAnswers(session.event?._data?.comment);
+    const parseRegex = (input: string) => {
+      const slashMatch = input.match(/^\/(.+)\/([a-z]*)$/);
+      if (slashMatch) return new RegExp(slashMatch[1], slashMatch[2]);
+      return new RegExp(input, 'i');
+    };
     switch (type) {
       case 'member': {
         const { MemberRequestAutoRules = [] } = this.config;
@@ -187,10 +192,12 @@ export class OnebotRequest {
         if (!hasKeywordRule && !hasLevelRule) return false;
         if (hasKeywordRule) {
           try {
-            const match = new RegExp(rule.keyword).test(validationMessage);
-            if (this.config.enableDebug) this.logger.info(`关键词规则检查: result=${match}, expression='${rule.keyword}', input='${validationMessage}'`);
+            const regex = parseRegex(rule.keyword);
+            const match = regex.test(validationMessage);
+            if (this.config.enableDebug) this.logger.info(`关键词规则检查: result=${match}, expression='${regex.toString()}', input='${validationMessage}'`);
             if (!match) return false;
           } catch (e) {
+            this.logger.error(`正则解析失败: ${rule.keyword}`, e);
             return false;
           }
         }
@@ -211,11 +218,12 @@ export class OnebotRequest {
         const { FriendRequestAutoRegex, FriendLevel = -1 } = this.config;
         if (FriendRequestAutoRegex) {
           try {
-            const match = new RegExp(FriendRequestAutoRegex).test(validationMessage);
-            if (this.config.enableDebug) this.logger.info(`好友正则检查: result=${match}, expression='${FriendRequestAutoRegex}', input='${validationMessage}'`);
+            const regex = parseRegex(FriendRequestAutoRegex);
+            const match = regex.test(validationMessage);
+            if (this.config.enableDebug) this.logger.info(`好友正则检查: result=${match}, expression='${regex.toString()}', input='${validationMessage}'`);
             if (match) return true;
           } catch (e) {
-            this.logger.warn(`好友申请正则无效: ${FriendRequestAutoRegex}`);
+            this.logger.warn(`正则解析失败: ${FriendRequestAutoRegex}`);
           }
         }
         if (FriendLevel < 0) return false;
