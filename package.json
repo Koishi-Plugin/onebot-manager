@@ -1,14 +1,14 @@
 {
   "name": "koishi-plugin-onebot-manager",
-  "description": "群管插件，功能梭哈，支持禁言/踢出等全部管理可用功能，另可自动审核好友/加群/邀请请求，还支持进退群等事件通知",
-  "version": "1.0.2",
+  "description": "群管插件，功能梭哈，支持禁言/踢出等全部管理可用功能，还支持进退群等事件通知",
+  "version": "1.0.3",
   "contributors": [
     "Yis_Rime <yis_rime@outlook.com>"
   ],
-  "homepage": "https://github.com/YisRime/koishi-plugin-onebot-manager",
+  "homepage": "https://github.com/Koishi-Plugin/onebot-manager",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YisRime/koishi-plugin-onebot-manager.git"
+    "url": "git+https://github.com/Koishi-Plugin/onebot-manager.git"
   },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
