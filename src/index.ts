@@ -27,14 +27,12 @@ export interface Config {
   enableLeave?: boolean
   leaveMessage?: string
   redirectMsg?: boolean
-  enableKick?: boolean
   enableAdmin?: boolean
   commandWhitelist?: string[]
 }
 
 export const Config: Schema<Config> = Schema.intersect([
   Schema.object({
-    enableKick: Schema.boolean().description('开启被踢监听').default(true),
     enableAdmin: Schema.boolean().description('开启管理监听').default(true),
     notifyTarget: Schema.string().description('通知目标(guild/private:number)').required(),
     enableJoin: Schema.boolean().description('开启入群监听').default(false),

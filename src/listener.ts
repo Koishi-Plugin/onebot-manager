@@ -56,40 +56,6 @@ export class OneBotListener {
   }
 
   /**
-   * 处理机器人被踢或主动退群事件
-   */
-  private async handleBotRemoved(session: Session): Promise<void> {
-    const { notifyTarget = '' } = this.config;
-    if (!notifyTarget) return;
-    const [targetType, targetId] = notifyTarget.split(':');
-    if (!targetId || (targetType !== 'guild' && targetType !== 'private')) {
-      this.logger.warn(`通知目标错误: ${notifyTarget}`);
-      return;
-    }
-    try {
-      const subType = session.event?._data?.sub_type;
-      const operatorId = session.event.operator?.id || session.event?._data?.operator_id;
-      const guildId = session.guildId;
-      const guild = await session.bot.getGuild(guildId).catch(() => null);
-      const guildIdentifier = guild?.name ? `${guild.name}(${guildId})` : guildId;
-      let msg = '';
-      if (subType === 'kick_me' && operatorId) {
-        const operator = await session.bot.getUser(operatorId.toString()).catch(() => null);
-        const operatorIdentifier = operator?.name ? `${operator.name}(${operatorId})` : operatorId;
-        msg = `已被 ${operatorIdentifier} 踢出 ${guildIdentifier}`;
-      } else {
-        msg = `已退出 ${guildIdentifier}`;
-      }
-      const sendFunc = targetType === 'private'
-        ? (m) => session.bot.sendPrivateMessage(targetId, m)
-        : (m) => session.bot.sendMessage(targetId, m);
-      await sendFunc(msg);
-    } catch (error) {
-      this.logger.error(`发送被踢/退群通知失败:`, error);
-    }
-  }
-
-  /**
    * 处理群内管理员变动事件，并发送到 notifyTarget
    */
   private async handleAdminChange(session: Session): Promise<void> {
@@ -145,9 +111,6 @@ export class OneBotListener {
     }
     if (this.config.enableLeave) {
       this.ctx.on('guild-member-removed', (session) => this.sendGuildMemberUpdateMessage(session, this.config.leaveMessage));
-    }
-    if (this.config.enableKick) {
-      this.ctx.on('guild-removed', this.handleBotRemoved.bind(this));
     }
     if (this.config.enableAdmin) {
       this.ctx.on('guild-member' as any, this.handleAdminChange.bind(this));
