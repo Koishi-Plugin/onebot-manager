@@ -234,7 +234,7 @@ export function registerCommands(qgroup: Command, logger: Logger, utils: any, co
     ));
 
   // 撤回消息
-  qgroup.subcommand('revoke', '撤回消息')
+  qgroup.subcommand('recall', '撤回消息')
     .usage('回复指定消息来撤回对应内容。')
     .action(async ({ session }) => {
       const quote = session.quote;
