@@ -238,7 +238,7 @@ export function registerCommands(qgroup: Command, logger: Logger, utils: any, co
     .usage('回复指定消息来撤回对应内容。')
     .action(async ({ session }) => {
       const quote = session.quote;
-      if (!quote?.id) return '请回复需要撤回的消息';
+      if (!quote?.id) return utils.handleError(session, '请回复需要撤回的消息');
       try {
         const isWhitelisted = commandWhitelist.includes(session.userId);
         if (isWhitelisted) {
@@ -248,8 +248,7 @@ export function registerCommands(qgroup: Command, logger: Logger, utils: any, co
         const { user: userRole } = await utils.checkPermission(session, session.guildId, logger);
         if (userRole !== 'member' || quote.user?.id === session.userId || quote.user?.id === session.selfId) {
           await session.onebot.deleteMsg(quote.id);
-        } else {
-          return utils.handleError(session, '仅管理员可撤回他人消息');
+          return;
         }
       } catch (error) {
         logger.warn(`撤回消息 ${quote.id} 失败:`, error);
