@@ -81,7 +81,7 @@ function adminAction(set: boolean, utils: any, logger: Logger, commandWhitelist:
 /**
  * 注册所有群管相关命令
  */
-export function registerCommands(qgroup: Command, logger: Logger, utils: any, commandWhitelist: string[]) {
+export function registerCommands(qgroup: Command, logger: Logger, utils: any, commandWhitelist: string[], forbiddenTitles?: Record<string, string>) {
   // 设置专属头衔
   qgroup.subcommand('tag [title:string] [target]', '设置专属头衔')
     .option('group', '-g, --group <groupId> 指定群号')
@@ -90,6 +90,17 @@ export function registerCommands(qgroup: Command, logger: Logger, utils: any, co
       try {
         const groupId = getGroupId(options, session);
         if (title && getTitleLen(title) > 18) return '设置头衔失败: 长度超过18字符';
+
+        if (title && forbiddenTitles) {
+          const rule = forbiddenTitles[groupId] || forbiddenTitles['*'] || forbiddenTitles['global'];
+          if (rule) {
+            try {
+              if (new RegExp(rule).test(title)) return '设置头衔失败: 头衔违规';
+            } catch (e) {
+              logger.error(`正则 ${rule} 解析失败：`, e);
+            }
+          }
+        }
 
         const targetId = getTargetId(target, session, utils);
         if (targetId === '无效成员') return targetId;

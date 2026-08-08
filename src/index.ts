@@ -29,6 +29,7 @@ export interface Config {
   redirectMsg?: boolean
   enableAdmin?: boolean
   commandWhitelist?: string[]
+  forbiddenTitles?: Record<string, string>
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -43,6 +44,7 @@ export const Config: Schema<Config> = Schema.intersect([
   }).description('监听配置'),
   Schema.object({
     commandWhitelist: Schema.array(String).description('命令使用白名单').role('table'),
+    forbiddenTitles: Schema.dict(Schema.string()).role('table').description('违规头衔配置'),
   }).description('命令配置'),
 ])
 
@@ -50,5 +52,5 @@ export function apply(ctx: Context, config: Config = {}) {
   const logger = ctx.logger('onebot-manager')
   new OneBotListener(ctx, logger, config).registerEventListeners()
   const qgroup = ctx.command('qgroup', 'QQ 群管').usage('群管相关功能（需要管理权限）')
-  registerCommands(qgroup, logger, utils, config.commandWhitelist || [])
+  registerCommands(qgroup, logger, utils, config.commandWhitelist || [], config.forbiddenTitles)
 }
